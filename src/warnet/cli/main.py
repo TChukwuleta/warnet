@@ -1,6 +1,8 @@
 import click
+import shutil
 from requests.exceptions import ConnectionError
 from rich import print as richprint
+import os
 
 from warnet.cli.debug import debug
 from warnet.cli.graph import graph
@@ -146,6 +148,26 @@ def stop():
         richprint("Stopped warnet")
     except Exception as e:
         print(e)
+
+@cli.command(name="cp")
+@click.argument('source', required=True)
+@click.argument('destination', required=True)
+def copy_tank_files(source, destination):
+    """
+    Copy tank files from one location to another location
+    """
+    try:
+        destination = os.path.join(source, os.path.basename(destination))
+        shutil.copy2(source, destination)
+        #shutil.copytree(source, destination)
+        print(f"Successfully copied from {source} to {destination}")
+    except PermissionError:
+        try:
+            os.replace(source, destination)
+            print(f"Successfully copied (forced) from {source} to {destination}")
+        except Exception as e:
+            print(f"Error: {e}")
+
 
 
 if __name__ == "__main__":
